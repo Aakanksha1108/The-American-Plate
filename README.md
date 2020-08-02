@@ -7,6 +7,21 @@ Please follow these steps to see a working version of the visualization: <br />
 
 Some images from the D3 visualization are posted below: <br />
 
+#### Cover page of the project <br />
+
 ![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%202.27.32%20PM.png?raw=true)
+
+#### Macronutrient intake <br />
+(These are dynamic visualizations that show the change in macronutrient consumption over time) <br />
+
+
+#### Imports from foreign countries <br />
+(These are dynamic visualizations that show how food imports and preferences have changed over time) <br />
+
+
+#### Hype cycle for different food trends (based on google search data)
+
+
+
 
 
