@@ -23,7 +23,15 @@ Some images from the D3 visualization are posted below: <br />
 
 ![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%202.28.51%20PM.png?raw=true)
 
+![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%202.29.06%20PM.png?raw=true)
+
 ### Hype cycle for different food trends (created using google search data as proxy for popularity)
+
+![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%202.29.58%20PM.png?raw=true)
+
+![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%203.50.31%20PM.png?raw=true)
+
+![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%203.50.46%20PM.png?raw=true)
 
 
 
