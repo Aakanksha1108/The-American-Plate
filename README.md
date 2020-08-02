@@ -8,16 +8,16 @@ Please follow these steps to see a working version of the visualization: <br />
 Some images from the D3 visualization are posted below: <br />
 
 ### Cover page of the project <br />
-
+<kbd>
 ![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%202.27.32%20PM.png?raw=true)
-
+</kbd>
 ### Macronutrient intake <br />
-(These are dynamic visualizations that show the change in macronutrient consumption over time) <br />
+*(These are dynamic visualizations that show the change in macronutrient consumption over time)* <br />
 
 ![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%202.28.10%20PM.png?raw=true)
 
 ### Imports from foreign countries <br />
-(These are dynamic visualizations that show how food imports and preferences have changed over time) <br />
+*(These are dynamic visualizations that show how food imports and preferences have changed over time)* <br />
 
 ![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%202.28.32%20PM.png?raw=true)
 
@@ -32,6 +32,10 @@ Some images from the D3 visualization are posted below: <br />
 ![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%203.50.31%20PM.png?raw=true)
 
 ![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%203.50.46%20PM.png?raw=true)
+
+### Final page
+
+![alt txt](https://github.com/Aakanksha1108/D3_Assignment/blob/master/Screen%20Shot%202020-08-02%20at%203.51.04%20PM.png?raw=true)
 
 
 
