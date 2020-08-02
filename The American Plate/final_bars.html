@@ -1,0 +1,475 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">    
+    <title>bars</title>
+    <style>
+      .axis {
+        font: 12px sans-serif;
+      }
+
+      button {
+        position: fixed;
+        bottom: 25px;
+        left: 95%;
+        margin-left: -104.5px; /*104.5px is half of the button's width*/
+    }
+
+    h1{
+        position: fixed;
+        
+        bottom: 210px;
+        left: 66%;
+        margin-left: -104.5px; /*104.5px is half of the button's width*/
+    }
+
+p{
+        position: fixed;
+        bottom: 50px;
+        left: 66%;
+        margin-left: -104.5px; /*104.5px is half of the button's width*/
+    }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+
+      .axis--y path {
+        display: none;
+      }
+
+      .bar {
+        fill: #3182bd;
+        fill-opacity: .9;
+      }
+
+      .bar2 {
+        fill: #D67935;
+        fill-opacity: .9;
+      }
+
+
+      .wld {
+        fill: #9ecae1;
+      }
+      
+      .chart-title {
+        margin-bottom: 0;
+      }
+      
+      .source {
+        margin-top: 0;
+        font-size: 16px;
+      }
+
+      .split {
+        height: 100%;
+        width: 50%;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        overflow-x: hidden;
+        padding-top: 20px;
+      }
+
+      .left {
+        left: 0;
+        background-color: white;
+      }
+
+      .right {
+        right: 0;
+        background-color: white;
+      }
+
+      .centered {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }            
+      
+    </style>
+  </head>
+  <body>
+
+<div class="split right">
+  <div class="centered">
+
+    <div class="wrapper">
+      <h2 class="chart-title">Top 5 food categories imported annualy 1999-2017 [Year = <span class="year"></span>]</h2>
+      <div class="chart"></div>
+      
+    </div>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+    'use strict';
+  
+    const margin = {top: 20, right: 30, bottom: 310, left: 140};
+    const width = 560 - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
+    const percentFormat = d3.format('.0%');
+    const leftPadding = 5;
+  
+    const delay = function(d, i) {
+      return i * 20;
+    };
+  
+    function sortData(data) {
+      return data.sort((a, b) => b.value - a.value);
+    }
+  
+    function removeFoodCategoriesWithNoData(data) {
+      return data.filter(d => d.value);
+    }
+    
+    var xScale = d3.scaleLinear()
+        .range([0, width])
+        .domain([0, 22]);
+
+    const yScale = d3.scaleBand()
+        .rangeRound([0, height], 0.1)
+        .padding(0.1);
+  
+    
+    function prepareData(data) {
+      return data.reduce((accumulator, d) => {
+        Object.keys(d).forEach((k) => {
+          if (!Number.isInteger(+k)) { return; }
+          let value;
+          if (d[+k] === '..') {
+            value = 0;
+          } else {
+            value = +d[+k];
+          }
+          const newEntry = {
+            value,
+            FoodCategoryName: d.FoodCategory,
+          };
+          if (accumulator[+k]) {
+            accumulator[+k].push(newEntry);
+          } else {
+            accumulator[+k] = [newEntry];
+          }
+        });
+        return accumulator;
+      }, {});            
+    }
+  
+    function xAccessor(d) {
+      return d.value;
+    }
+  
+    function yAccessor(d) {
+      return d.FoodCategoryName;
+    }
+  
+  
+    function drawXAxis(el) {
+      el.append('g')
+          .attr('class', 'axis axis--x')
+          .attr('transform', `translate(${leftPadding},${height})`)
+          .call(d3.axisBottom(xScale).tickFormat(d3.format("")));
+    }
+  
+    function drawYAxis(el, data, t) {
+      let axis = el.select('.axis--y');
+      if (axis.empty()) {
+        axis = el.append('g')
+          .attr('class', 'axis axis--y');
+      }
+  
+      axis.transition(t)
+          .call(d3.axisLeft(yScale))
+        .selectAll('g')
+          .delay(delay);
+    }
+  
+    function drawBars(el, data, t) {
+      let barsG = el.select('.bars-g');
+      if (barsG.empty()) {
+        barsG = el.append('g')
+          .attr('class', 'bars-g');
+      }
+  
+      const bars = barsG
+        .selectAll('.bar')
+        .data(data, yAccessor);
+      bars.exit()
+        .remove();
+      bars.enter()
+        .append('rect')
+          .attr('class', d => d.FoodCategoryCode === 'WLD' ? 'bar' : 'bar')
+          .attr('x', leftPadding)
+        .merge(bars).transition(t)
+          .attr('y', d => yScale(yAccessor(d)))
+          .attr('width', d => xScale(xAccessor(d)/1000))
+          .attr('height', yScale.bandwidth())
+          .delay(delay);
+    }
+  
+    const svg = d3.select('.chart').append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+  
+    fetch('https://raw.githubusercontent.com/bhavyakaushik17/D3-Project/master/data.csv')
+      .then((res) => res.text())
+      .then((res) => {
+        const data = prepareData(d3.csvParse(res));
+        const years = Object.keys(data).map(d => +d);
+        const lastYear = years[years.length - 1];
+        let startYear = years[0];
+        let selectedData = removeFoodCategoriesWithNoData(sortData(data[startYear]).slice(0,5));
+        let foodCategories = selectedData.map(yAccessor);
+  
+        d3.select('.year').text(startYear);
+  
+        yScale.domain(foodCategories);
+        drawXAxis(svg, selectedData);
+        drawYAxis(svg, selectedData);
+        drawBars(svg, selectedData);
+      
+        // text label for the x axis
+        svg.append("text")             
+          .attr("transform",
+                "translate(" + (width/2) + " ," + 
+                (height + margin.top + 40) + ")")
+          .style("text-anchor", "middle")
+          .text("Import Value in Billion $")
+          .style("fill", "087352")
+          .style("font-size", "20px"); 
+
+        // text label for the y axis
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x",0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Food Category")
+            .style("fill", "087352")
+            .style("font-size", "20px"); 
+
+
+  
+        const interval = d3.interval(() => {
+          const t = d3.transition().duration(500);
+  
+          startYear += 1;
+          selectedData = removeFoodCategoriesWithNoData(sortData(data[startYear]).slice(0,5));
+  
+          d3.select('.year').text(startYear);
+  
+          yScale.domain(selectedData.map(yAccessor));
+          drawYAxis(svg, selectedData, t);
+          drawBars(svg, selectedData, t);
+  
+          if (startYear === lastYear) {
+            interval.stop();
+          }
+        }, 1000);
+      });
+  </script>
+    
+  </div>
+</div> 
+    
+    
+<div class="split left">
+  <div class="centered">
+
+    <div class="wrapper">
+      <h2 class="chart-title">Top 10 countries by annual food import 1999-2017 [Year = <span class="year2"></span>]</h2>
+      <div class="chart2"></div>
+ 
+    </div>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+    'use strict';
+  
+    const margin2 = {top: 20, right: 30, bottom: 80, left: 160};
+    const width2 = 560 - margin2.left - margin2.right;
+    const height2 = 600 - margin2.top - margin2.bottom;
+    const percentFormat2 = d3.format('.0%');
+    const leftPadding2 = 5;
+  
+    const delay2 = function(d, i) {
+      return i * 20;
+    };
+  
+    function sortData(data) {
+      return data.sort((a, b) => b.value - a.value);
+    }
+  
+    function removeFoodCategoriesWithNoData(data) {
+      return data.filter(d => d.value);
+    }
+    
+    var xScale2 = d3.scaleLinear()
+        .range([0, width2])
+        .domain([0, 27]);
+
+    const yScale2 = d3.scaleBand()
+        .rangeRound([0, height2], 0.1)
+        .padding(0.1);
+  
+    
+    function prepareData2(data) {
+      return data.reduce((accumulator, d) => {
+        Object.keys(d).forEach((k) => {
+          if (!Number.isInteger(+k)) { return; }
+          let value;
+          if (d[+k] === '..') {
+            value = 0;
+          } else {
+            value = +d[+k];
+          }
+          const newEntry = {
+            value,
+            Country: d.Country,
+          };
+          if (accumulator[+k]) {
+            accumulator[+k].push(newEntry);
+          } else {
+            accumulator[+k] = [newEntry];
+          }
+        });
+        return accumulator;
+      }, {});            
+    }
+  
+    function xAccessor2(d) {
+      return d.value/1000;
+    }
+  
+    function yAccessor2(d) {
+      return d.Country;
+    }
+  
+  
+    function drawXAxis2(el) {
+      el.append('g')
+          .attr('class', 'axis axis--x')
+          .attr('transform', `translate(${leftPadding2},${height2})`)
+          .call(d3.axisBottom(xScale2).tickFormat(d3.format("")));
+    }
+  
+    function drawYAxis2(el, data, t) {
+      let axis = el.select('.axis--y');
+      if (axis.empty()) {
+        axis = el.append('g')
+          .attr('class', 'axis axis--y');
+      }
+  
+      axis.transition(t)
+          .call(d3.axisLeft(yScale2))
+        .selectAll('g')
+          .delay(delay2);
+    }
+  
+    function drawBars2(el, data, t) {
+      let barsG = el.select('.bar2s-g');
+      if (barsG.empty()) {
+        barsG = el.append('g')
+          .attr('class', 'bar2s-g');
+      }
+  
+      const bars = barsG
+        .selectAll('.bar2')
+        .data(data, yAccessor2);
+      bars.exit()
+        .remove();
+      bars.enter()
+        .append('rect')
+          .attr('class', d => d.FoodCategoryCode === 'WLD' ? 'bar2' : 'bar2')
+          .attr('x', leftPadding2)
+        .merge(bars).transition(t)
+          .attr('y', d => yScale2(yAccessor2(d)))
+          .attr('width', d => xScale2(xAccessor2(d)))
+          .attr('height', yScale2.bandwidth())
+          .delay(delay2);
+    }
+  
+    const svg2 = d3.select('.chart2').append('svg')
+        .attr('width', width2 + margin2.left + margin2.right)
+        .attr('height', height2 + margin2.top + margin2.bottom)
+      .append('g')
+        .attr('transform', `translate(${margin2.left},${margin2.top})`);
+  
+    fetch('https://raw.githubusercontent.com/bhavyakaushik17/D3-Project/master/data_latest.csv')
+      .then((res) => res.text())
+      .then((res) => {
+        const data = prepareData2(d3.csvParse(res));
+        const years = Object.keys(data).map(d => +d);
+        const lastYear = years[years.length - 1];
+        let startYear = years[0];
+        let selectedData = removeFoodCategoriesWithNoData(sortData(data[startYear]).slice(0,10));
+        let foodCategories = selectedData.map(yAccessor2);
+  
+        d3.select('.year2').text(startYear);
+  
+        yScale2.domain(foodCategories);
+        drawXAxis2(svg2, selectedData);
+        drawYAxis2(svg2, selectedData);
+        drawBars2(svg2, selectedData);
+      
+        // text label for the x axis
+        svg2.append("text")             
+          .attr("transform",
+                "translate(" + (width2/2) + " ," + 
+                (height2 + margin2.top + 20) + ")")
+          .style("text-anchor", "middle")
+          .text("Import Value in Billion $")
+          .style("fill", "087352")
+          .style("font-size", "20px"); 
+
+        // text label for the y axis
+        svg2.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin2.left+20)
+            .attr("x",0 - (height2 / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Country")
+            .style("fill", "087352")
+            .style("font-size", "20px"); 
+
+
+  
+        const interval = d3.interval(() => {
+          const t = d3.transition().duration(500);
+  
+          startYear += 1;
+          selectedData = removeFoodCategoriesWithNoData(sortData(data[startYear]).slice(0,10));
+  
+          d3.select('.year2').text(startYear);
+  
+          yScale2.domain(selectedData.map(yAccessor2));
+          drawYAxis2(svg2, selectedData, t);
+          drawBars2(svg2, selectedData, t);
+  
+          if (startYear === lastYear) {
+            interval.stop();
+          }
+        }, 1000);
+      });
+  </script>
+    
+    </div>
+    <h1  style="font-size:20px;" font-family='comic-sans', sans-serif;>Insights</h1>
+    <p font-size ="1" font-family="comic-sans">
+   - Fish and shellfish are the top food imports of USA<br></br>
+   - Fruits beverages and vegetables have gone behind in the food category imports<br></br>
+   - Canada and Mexico have been the top countries from which USA imports<br></br>
+   - China and India have climbed up in the imports race in the last two decades</p>
+    <button onclick="window.location.href = 'sunburst_chart.html';">Next</button>
+  </div>   
+  </body>
+</html>

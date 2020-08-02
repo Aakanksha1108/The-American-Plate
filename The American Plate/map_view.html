@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+
+body {
+   font-family: Arial, Helvetica, sans-serif;
+}
+
+.footer {
+    color: #888888;
+    font-size: 13px;
+    text-align: right;
+}
+
+#states path {
+  fill: #ccc;
+  stroke: #fff;
+}
+
+circle {
+  fill-opacity: .6;
+  stroke: #fff;
+}
+button {
+        position: fixed;
+        bottom: 135px;
+        left: 95%;
+        margin-left: -104.5px; /*104.5px is half of the button's width*/
+    }
+    h2{
+        position: fixed;
+        
+        bottom: 450px;
+        left: 74%;
+        margin-left: -104.5px; /*104.5px is half of the button's width*/
+    }
+
+p{
+        position: fixed;
+        bottom: 325px;
+        left: 74%;
+        margin-left: -104.5px; /*104.5px is half of the button's width*/
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" />
+
+<script src="https://d3js.org/d3.v2.js"></script>
+
+</head>
+
+<body>
+<h1>	
+Food Import in US from top exporters
+</h1>
+Expressed in 3 Million $
+<h5>*Please use the slider below the chart to observe change over time</h5>
+
+<div id="graph"></div>
+
+
+<label for="year">Year :</label>
+<input type="text" id="year" style="border:0; color:#f6931f; font-weight:bold; " />
+
+<div id="slider" style="width: 200px;"></div>
+<button onclick="window.location.href = 'paleo.html';">Next</button>
+<h2  style="font-size:20px;" font-family='comic-sans', sans-serif;>Insights</h2>
+<p font-size ="1" font-family="comic-sans">
+- Mexico and Canada exports the highest volumes to US<br></br>
+- While meat and animals is imported maximum from Canada<br></br>
+- Fruits and vegetables are imported from Mexico<br></br></p>
+<script type="text/javascript">
+
+
+
+$(document).ready(function() {
+
+$("#slider").slider({
+	value:1999,
+	min: 1999,
+	max: 2017,
+	step: 1,
+	slide: function( event, ui ) {
+		$("#year").val(ui.value);
+		redraw(ui.value.toString());
+	}
+});
+$("#year").val($("#slider").slider("value") );
+
+var w = 1200;
+var h = 500;
+
+var xy = d3.geo.equirectangular()
+          .scale(1000);
+
+var path = d3.geo.path()
+    .projection(xy);
+
+
+var svg = d3.select("#graph").insert("svg:svg")
+	.attr("width", w)
+        .attr("height", h);
+
+var states = svg.append("svg:g")
+    .attr("id", "states");
+
+var circles = svg.append("svg:g")
+    .attr("id", "circles");
+
+var labels = svg.append("svg:g")
+    .attr("id", "labels");
+
+var label1 = svg.append("svg:g")
+    .attr("id", "labels");
+
+d3.json("https://raw.githubusercontent.com/manish2020-iitr/Msia2020/master/world_countries.json", function(collection) {
+  states.selectAll("path")
+      .data(collection.features)
+    .enter().append("svg:path")
+      .attr("d", path)
+            .on("mouseover", function(d) {
+                d3.select(this).style("fill","#6C0")
+                    .append("svg:title")
+                    .text(d.properties.name);})
+            .on("mouseout", function(d) {
+                d3.select(this).style("fill","#ccc");})
+});
+
+
+//http://stackoverflow.com/questions/11386150/lat-lon-positon-on-a-d3-js-map
+// +convert to string to number
+
+var scalefactor=1./50. ;
+
+d3.csv("https://raw.githubusercontent.com/Shreyashi2610/D3_Project/master/food_import.csv", function(csv) {
+  circles.selectAll("circle")
+      .data(csv)
+    .enter()
+    .append("svg:circle")
+      .attr("cx", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+      .attr("cy", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
+      .attr("r",  function(d) { return (+d["1999"])*scalefactor; })
+      .attr("title",  function(d) { return d["country"]+": "+Math.round(d["1999"]); })
+	  .attr("fill",  function(d) { return d["color"]; })
+            .on("mouseover", function(d) {
+                d3.select(this).style("fill","#FC0").append("svg:title").text(d["country"]);})
+				  
+            .on("mouseout", function(d, i) {
+                d3.select(this).style("fill",d["color"]);});
+
+  labels.selectAll("labels")
+      .data(csv)
+    .enter()
+    .append("svg:text")
+        .attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+        .attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
+        .attr("dy", "0.1em")
+        .attr("text-anchor", "middle")
+        .text(function(d) { return Math.round(d["1999"])});
+
+  label1.selectAll("labels")
+      .data(csv)
+    .enter()
+    .append("svg:text")
+        .attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]+10])[0]; })
+        .attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]+10])[1]; })
+        .attr("dy", "0.1em")
+        .attr("text-anchor", "middle")
+        .text(function(d) { return d["country"]});
+
+});
+
+function redraw(year) {
+      circles.selectAll("circle")
+	  .transition()
+          .duration(1000).ease("linear")
+          .attr("r",  function(d) { return (+d[year])*scalefactor; })
+          .attr("title",  function(d) { return d["country"]+": "+Math.round(d[year]); });
+
+      labels.selectAll("text")
+          .text(function(d) { return Math.round(d[year]); });
+
+      label1.selectAll("text")
+          .text(function(d) { return d["country"] });
+}
+
+});
+
+</script>
+
+
+
+</body>
+
+</html>
